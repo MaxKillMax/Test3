@@ -24,6 +24,7 @@ public class TurnTrigger : MonoBehaviour
             playerStatus.ChangeBorders(leftBorder, rightBorder);
 
             Destroy(obstacles);
+            Destroy(gameObject);
         }
     }
 }

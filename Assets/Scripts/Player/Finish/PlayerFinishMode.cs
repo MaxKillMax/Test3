@@ -9,6 +9,9 @@ public class PlayerFinishMode : MonoBehaviour
     [SerializeField] private GameObject restartButton;
     [SerializeField] private PlayerFinishMode playerFinishMode;
     [SerializeField] private PlayerFinishMove playerFinishMove;
+    [SerializeField] private PlayerUI playerUI;
+    [SerializeField] private PlayerStatus playerStatus;
+    [SerializeField] private Rigidbody rigidBody;
     [SerializeField] private Animator animator;
 
     private int lastTouch;
@@ -16,15 +19,14 @@ public class PlayerFinishMode : MonoBehaviour
 
     public void Finish()
     {
-        playerMove.StartFinish();
+        playerMove.enabled = false;
+        playerUI.TryChangeSpeed(500);
         playerFinishMode.enabled = true;
         restartButton.SetActive(false);
     }
 
     public void EndFinish()
     {
-        Debug.Log(clickCount);
-        playerMove.enabled = false;
         playerFinishMode.enabled = false;
         playerFinishMove.enabled = true;
         playerFinishMove.GetInformation(clickCount);
@@ -33,6 +35,8 @@ public class PlayerFinishMode : MonoBehaviour
 
     private void Update()
     {
+        rigidBody.velocity = new Vector3((playerStatus.rightBorder + playerStatus.leftBorder) / 2 - transform.position.x, 0.1f, 500 * Time.fixedDeltaTime);
+
         if (Input.touchCount > lastTouch)
         {
             clickCount++;

@@ -6,15 +6,20 @@ public class PlayerFinishMove : MonoBehaviour
 
     [SerializeField]private float timer;
     private float clickCount;
-    private float boosterY = 5;
+    private float boosterY = 6;
 
     public void GetInformation(int clickCount)
     {
         this.clickCount = clickCount;
 
-        if (clickCount < 10)
+        if (clickCount < 5)
         {
-            clickCount = 10;
+            this.clickCount = 5;
+        }
+        else
+        if (clickCount > 34)
+        {
+            this.clickCount = 34;
         }
     }
 
@@ -25,7 +30,7 @@ public class PlayerFinishMove : MonoBehaviour
         {
             // Need PlayerStatus.positive and !PlayerStatus.vectorX
             boosterY -= Time.deltaTime;
-            rigidBody.velocity = new Vector3(0, clickCount * boosterY * 15 * Time.deltaTime, clickCount * 15 * Time.deltaTime);
+            rigidBody.velocity = new Vector3(0, clickCount * boosterY * Time.deltaTime, clickCount * 7 * Time.deltaTime);
         }
     }
 }

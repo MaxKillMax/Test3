@@ -1,122 +1,126 @@
 using UnityEngine;
-using UnityEngine.UI;
 
 public class PlayerMove : MonoBehaviour
 {
     [Header("Components")]
     [SerializeField] private Rigidbody rigidBody;
     [SerializeField] private PlayerStatus playerStatus;
-    [SerializeField] private Text score;
+    [SerializeField] private PlayerUI playerUI;
 
-    [Header("Vars")]
-    [SerializeField] private float speed;
-    private float lastSpeed;
+    private float speed = 150;
     private float direction;
-    private bool finishMode;
-
-    private void Start()
-    {
-        lastSpeed = speed;
-    }
 
     private void Update()
     {
-        print(speed);
-        if (!finishMode && Input.touchCount > 0)
-        {
-            direction = Input.GetTouch(0).position.x / (Screen.width / 10) - 5;
+        float forwardMove = speed * Time.fixedDeltaTime;
+        float sideMove = speed * Time.fixedDeltaTime / 3;
 
-            if (!playerStatus.positive || (playerStatus.positive && playerStatus.vectorX))
+        if (Input.touchCount > 0)
+        {
+            direction = Input.GetTouch(0).position.x;
+
+            for (int i = 10; i >= 0; i--)
             {
-                direction *= -1;
+                if (direction > Screen.width / 10 * i)
+                {
+                    if ((playerStatus.positive && !playerStatus.vectorX) ||
+                        !playerStatus.positive && playerStatus.vectorX)
+                    {
+                        direction = playerStatus.leftBorder;
+                    }
+                    else
+                    {
+                        direction = playerStatus.rightBorder;
+                    }
+
+                    if (playerStatus.positive && playerStatus.vectorX)
+                    {
+                        direction += (10 - i) - 0.5f;
+                    }
+                    else
+                    {
+                        direction += i + 0.5f;
+                    }
+
+                    break;
+                }
             }
         }
 
-        float num;
+        if (!playerStatus.positive)
+        {
+            forwardMove *= -1;
+        }
+
         if (playerStatus.vectorX)
         {
-            rigidBody.velocity = new Vector3(speed * Time.deltaTime, 0.1f, direction * 32 * Time.deltaTime * (speed / 200));
-            num = transform.position.z;
+            rigidBody.velocity = new Vector3(forwardMove, 0.1f, (direction - transform.position.z) * sideMove);
+            CheckBorders(transform.position.z);
         }
         else
         {
-            rigidBody.velocity = new Vector3(direction * 32 * Time.deltaTime * (speed / 200), 0.1f, speed * Time.deltaTime);
-            num = transform.position.x;
+            rigidBody.velocity = new Vector3((direction - transform.position.x) * sideMove, 0.1f, forwardMove);
+            CheckBorders(transform.position.x);
         }
-
-        CheckBorders(num);
-        CheckSpeed();
-        direction = 0;
     }
 
-    private void CheckBorders(float num)
+    private float CheckBorders(float number)
     {
+        float Right = playerStatus.rightBorder;
+        float Left = playerStatus.leftBorder;
+
         Vector3 pos = transform.position;
+        float result = number;
+
         if (playerStatus.vectorX)
         {
             if (playerStatus.positive)
             {
-                if (num < playerStatus.rightBorder + 0.3f)
-                    transform.position = new Vector3(pos.x, pos.y, playerStatus.rightBorder + 0.3f);
-                else if (num > playerStatus.leftBorder - 0.3f)
-                    transform.position = new Vector3(pos.x, pos.y, playerStatus.leftBorder - 0.3f);
+                if (number < Right + 0.3f)
+                    result = Right + 0.3f;
+                else
+                if (number > Left - 0.3f)
+                    result = Left - 0.3f;
             }
             else
             {
-                if (num < playerStatus.leftBorder + 0.3f)
-                    transform.position = new Vector3(pos.x, pos.y, playerStatus.leftBorder + 0.3f);
-                else if (num > playerStatus.rightBorder - 0.3f)
-                    transform.position = new Vector3(pos.x, pos.y, playerStatus.rightBorder - 0.3f);
+                if (number < Left + 0.3f)
+                    result = Left + 0.3f;
+                else
+                if (number > Right - 0.3f)
+                    result = Right - 0.3f;
             }
+
+            transform.position = new Vector3(pos.x, pos.y, result);
         }
         else
         {
             if (playerStatus.positive)
             {
-                if (num > playerStatus.rightBorder - 0.3f)
-                    transform.position = new Vector3(playerStatus.rightBorder - 0.3f, pos.y, pos.z);
-                else if (num < playerStatus.leftBorder + 0.3f)
-                    transform.position = new Vector3(playerStatus.leftBorder + 0.3f, pos.y, pos.z);
+                if (number > Right - 0.3f)
+                    result = Right - 0.3f;
+                else
+                if (number < Left + 0.3f)
+                    result = Left + 0.3f;
             }
             else
             {
-                if (num > playerStatus.leftBorder - 0.3f)
-                    transform.position = new Vector3(playerStatus.leftBorder - 0.3f, pos.y, pos.z);
-                else if (num < playerStatus.rightBorder + 0.3f)
-                    transform.position = new Vector3(playerStatus.rightBorder + 0.3f, pos.y, pos.z);
+                if (number > Left - 0.3f)
+                    result = Left - 0.3f;
+                else
+                if (number < Right + 0.3f)
+                    result = Right + 0.3f;
             }
-        }
-    }
 
-    private void CheckSpeed()
-    {
-        if (lastSpeed != speed)
-        {
-            lastSpeed = speed;
-            score.text = Mathf.Abs(speed).ToString();
+            transform.position = new Vector3(result, pos.y, pos.z);
         }
-    }
 
-    public void StartFinish()
-    {
-        finishMode = true;
-        speed = 500;
+        return result;
     }
 
     public void AddSpeed(float num)
     {
-        if (speed < 0)
-        {
-            speed -= num;
-        }
-        else
-        {
-            speed += num;
-        }
-    }
-
-    public void ReverseSpeed()
-    {
-        speed *= -1;
+        speed += num;
+        playerUI.TryChangeSpeed(speed);
     }
 }

@@ -4,7 +4,7 @@ public class PlayerStatus : MonoBehaviour
 {
     [Header("Components")]
     [SerializeField] private Rigidbody rigidBody;
-    [SerializeField] private PlayerMove playerMove;
+    [SerializeField] private PlayerTurn playerTurn;
 
     public bool vectorX { get; private set; }
     public bool positive { get; private set; }
@@ -36,7 +36,6 @@ public class PlayerStatus : MonoBehaviour
     {
         if (change != positive)
         {
-            playerMove.ReverseSpeed();
             positive = change;
         }
 
@@ -44,28 +43,26 @@ public class PlayerStatus : MonoBehaviour
         {
             if (positive)
             {
-                transform.rotation = Quaternion.Euler(0, 90, 0);
                 rotation = 90;
             }
             else
             {
-                transform.rotation = Quaternion.Euler(0, -90, 0);
-                rotation = -90;
+                rotation = 270;
             }
         }
         else if (!vectorX)
         {
             if (positive)
             {
-                transform.rotation = Quaternion.Euler(0, 0, 0);
                 rotation = 0;
             }
             else
             {
-                transform.rotation = Quaternion.Euler(0, 180, 0);
                 rotation = 180;
             }
         }
+
+        playerTurn.StartTurn(rotation);
     }
 
     public void ChangeBorders(float left, float right)
